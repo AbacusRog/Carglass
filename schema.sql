@@ -8,6 +8,7 @@ create table if not exists employees (
   working_days_per_year numeric(6,2) not null default 253,
   working_hours_per_day numeric(6,2) not null default 8.5,
   start_date date,
+  leave_date date,
   holiday_entitlement_days numeric(6,2) not null default 28,
   active boolean not null default true,
   created_at timestamptz not null default now(),

@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../supabaseClient'
-import { grossWage, formatCurrency, monthLabel, MONTH_NAMES } from '../lib/wage'
+import { grossWage, formatCurrency, monthLabel, MONTH_NAMES, isCurrentlyActive } from '../lib/wage'
 import AdjustmentsEditor from '../components/AdjustmentsEditor'
 
 const today = new Date()
@@ -60,7 +60,7 @@ export default function Timesheet() {
       existingByEmployee[row.employee_id] = row
     })
 
-    const missing = (emps || []).filter((e) => e.active && !existingByEmployee[e.id])
+    const missing = (emps || []).filter((e) => isCurrentlyActive(e) && !existingByEmployee[e.id])
     if (missing.length) {
       const inserts = missing.map((e) => ({
         employee_id: e.id,
@@ -150,7 +150,7 @@ export default function Timesheet() {
   }
 
   const selectedPeriod = periods.find((p) => p.id === selectedPeriodId)
-  const activeEmployees = employees.filter((e) => e.active)
+  const activeEmployees = employees.filter((e) => isCurrentlyActive(e))
 
   const rowsWithTotals = timesheets
     .map((row) => {
@@ -161,7 +161,7 @@ export default function Timesheet() {
       return { row, emp, adj, totals }
     })
     .filter(Boolean)
-    .filter(({ emp }) => emp.active)
+    .filter(({ emp }) => isCurrentlyActive(emp))
     .sort((a, b) => a.emp.name.localeCompare(b.emp.name))
 
   const periodGrossTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.gross, 0)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { dayRate, hourlyRate, monthlyRate, formatCurrency } from '../lib/wage'
+import { dayRate, hourlyRate, monthlyRate, formatCurrency, isCurrentlyActive } from '../lib/wage'
 
 const BLANK_FORM = {
   name: '',
@@ -8,6 +8,7 @@ const BLANK_FORM = {
   working_days_per_year: 253,
   working_hours_per_day: 8.5,
   start_date: '',
+  leave_date: '',
   holiday_entitlement_days: 28,
 }
 
@@ -46,6 +47,7 @@ export default function Employees() {
       working_days_per_year: emp.working_days_per_year,
       working_hours_per_day: emp.working_hours_per_day,
       start_date: emp.start_date || '',
+      leave_date: emp.leave_date || '',
       holiday_entitlement_days: emp.holiday_entitlement_days,
     })
     setEditingId(emp.id)
@@ -61,8 +63,16 @@ export default function Employees() {
       working_days_per_year: Number(form.working_days_per_year),
       working_hours_per_day: Number(form.working_hours_per_day),
       start_date: form.start_date || null,
+      leave_date: form.leave_date || null,
       holiday_entitlement_days: Number(form.holiday_entitlement_days),
       updated_at: new Date().toISOString(),
+    }
+
+    // A leave date that has already arrived means the employee has left —
+    // mark them inactive automatically rather than relying on a manual toggle.
+    const todayIso = new Date().toISOString().slice(0, 10)
+    if (payload.leave_date && payload.leave_date <= todayIso) {
+      payload.active = false
     }
 
     if (!payload.name || !payload.annual_wage) {
@@ -101,7 +111,7 @@ export default function Employees() {
     loadEmployees()
   }
 
-  const visible = employees.filter((e) => showInactive || e.active)
+  const visible = employees.filter((e) => showInactive || isCurrentlyActive(e))
 
   return (
     <div className="paper">
@@ -168,6 +178,14 @@ export default function Employees() {
             />
           </div>
           <div className="field">
+            <label>Leave date</label>
+            <input
+              type="date"
+              value={form.leave_date}
+              onChange={(e) => setForm({ ...form, leave_date: e.target.value })}
+            />
+          </div>
+          <div className="field">
             <label>Holiday entitlement (days/yr)</label>
             <input
               type="number"
@@ -214,15 +232,16 @@ export default function Employees() {
               <th className="num">Days/yr</th>
               <th className="num">Hrs/day</th>
               <th>Start date</th>
+              <th>Leave date</th>
               <th className="num">Holiday/yr</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {visible.map((emp) => (
-              <tr key={emp.id} style={{ opacity: emp.active ? 1 : 0.5 }}>
+              <tr key={emp.id} style={{ opacity: isCurrentlyActive(emp) ? 1 : 0.5 }}>
                 <td>
-                  {emp.name} {!emp.active && <span className="pill pill-red">Removed</span>}
+                  {emp.name} {!isCurrentlyActive(emp) && <span className="pill pill-red">Removed</span>}
                 </td>
                 <td className="num">{formatCurrency(emp.annual_wage)}</td>
                 <td className="num">{formatCurrency(monthlyRate(emp))}</td>
@@ -231,6 +250,7 @@ export default function Employees() {
                 <td className="num">{emp.working_days_per_year}</td>
                 <td className="num">{emp.working_hours_per_day}</td>
                 <td>{emp.start_date || <span className="helper-text">—</span>}</td>
+                <td>{emp.leave_date || <span className="helper-text">—</span>}</td>
                 <td className="num">{emp.holiday_entitlement_days}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
