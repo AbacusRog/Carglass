@@ -30,6 +30,7 @@ create table if not exists timesheets (
   extra_hours numeric(6,2) not null default 0,
   missing_hours numeric(6,2) not null default 0,
   holiday_days numeric(6,2) not null default 0,
+  full_month boolean not null default false,
   notes text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

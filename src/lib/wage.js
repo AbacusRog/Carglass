@@ -18,16 +18,27 @@ export function monthlyRate(employee) {
   return employee.annual_wage / 12
 }
 
-// timesheet: { days_worked, extra_hours, missing_hours, holiday_days }
+// timesheet: { days_worked, extra_hours, missing_hours, holiday_days, full_month }
 // adjustments: [{ kind: 'addition' | 'deduction', amount }]
 export function grossWage(employee, timesheet, adjustments = []) {
   const dr = dayRate(employee)
   const hr = hourlyRate(employee)
 
-  // Holiday days are paid leave, so they're paid at the day rate just like days worked.
-  const base = ((timesheet.days_worked || 0) + (timesheet.holiday_days || 0)) * dr
-  const extraPay = (timesheet.extra_hours || 0) * hr
-  const missingDeduction = (timesheet.missing_hours || 0) * hr
+  let base, extraPay, missingDeduction
+
+  if (timesheet.full_month) {
+    // Full month worked: pay the flat monthly salary rather than
+    // building it up from days worked, but extra/missing hours can
+    // still adjust it on top.
+    base = monthlyRate(employee)
+    extraPay = (timesheet.extra_hours || 0) * hr
+    missingDeduction = (timesheet.missing_hours || 0) * hr
+  } else {
+    // Holiday days are paid leave, so they're paid at the day rate just like days worked.
+    base = ((timesheet.days_worked || 0) + (timesheet.holiday_days || 0)) * dr
+    extraPay = (timesheet.extra_hours || 0) * hr
+    missingDeduction = (timesheet.missing_hours || 0) * hr
+  }
 
   const additions = adjustments
     .filter((a) => a.kind === 'addition')

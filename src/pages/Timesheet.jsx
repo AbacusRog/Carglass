@@ -69,6 +69,7 @@ export default function Timesheet() {
         extra_hours: 0,
         missing_hours: 0,
         holiday_days: 0,
+        full_month: false,
       }))
       const { data: created, error: insErr } = await supabase
         .from('timesheets')
@@ -127,20 +128,6 @@ export default function Timesheet() {
     await createPeriod(Number(newYear), Number(newMonth))
   }
 
-  function addNextMonth() {
-    // Base it on the latest period that exists, so "+1 Month" always
-    // advances from wherever the ledger currently ends. Falls back to
-    // the current calendar month if no periods exist yet.
-    const latest = periods[0]
-    let year = latest ? latest.year : today.getFullYear()
-    let month = latest ? latest.month + 1 : today.getMonth() + 1
-    if (month > 12) {
-      month = 1
-      year += 1
-    }
-    createPeriod(year, month)
-  }
-
   async function updateField(row, field, value) {
     const numeric = value === '' ? 0 : Number(value)
     setTimesheets((prev) =>
@@ -149,6 +136,16 @@ export default function Timesheet() {
     await supabase
       .from('timesheets')
       .update({ [field]: numeric, updated_at: new Date().toISOString() })
+      .eq('id', row.id)
+  }
+
+  async function toggleFullMonth(row, checked) {
+    setTimesheets((prev) =>
+      prev.map((r) => (r.id === row.id ? { ...r, full_month: checked } : r))
+    )
+    await supabase
+      .from('timesheets')
+      .update({ full_month: checked, updated_at: new Date().toISOString() })
       .eq('id', row.id)
   }
 
@@ -177,9 +174,6 @@ export default function Timesheet() {
           <h1 className="page-title">Monthly Timesheet</h1>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-outline" onClick={addNextMonth} title="Create the month right after the latest one">
-            +1 Month
-          </button>
           <button className="btn btn-brass" onClick={() => setShowNewMonth((s) => !s)}>
             + New month
           </button>
@@ -252,6 +246,7 @@ export default function Timesheet() {
             <thead>
               <tr>
                 <th>Employee</th>
+                <th className="num">Full month</th>
                 <th className="num">Days worked</th>
                 <th className="num">Holiday days</th>
                 <th className="num">Extra hrs</th>
@@ -268,10 +263,19 @@ export default function Timesheet() {
                     <td>{emp.name}</td>
                     <td className="num">
                       <input
+                        type="checkbox"
+                        checked={!!row.full_month}
+                        onChange={(e) => toggleFullMonth(row, e.target.checked)}
+                        title="Pay this employee their full monthly salary for this month"
+                      />
+                    </td>
+                    <td className="num">
+                      <input
                         className="cell-input"
                         type="number"
                         step="0.5"
                         defaultValue={row.days_worked}
+                        disabled={row.full_month}
                         onBlur={(e) => updateField(row, 'days_worked', e.target.value)}
                       />
                     </td>
@@ -325,7 +329,7 @@ export default function Timesheet() {
                   </tr>
                   {expandedRow === row.id && (
                     <tr>
-                      <td colSpan={8} style={{ background: 'var(--paper-shade)' }}>
+                      <td colSpan={9} style={{ background: 'var(--paper-shade)' }}>
                         <AdjustmentsEditor
                           timesheetId={row.id}
                           adjustments={adj}

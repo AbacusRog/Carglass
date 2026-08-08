@@ -24,6 +24,12 @@ Holiday days are paid leave, so they're paid at the day rate just like days
 actually worked — they're just tracked in their own column so you can report
 on them separately.
 
+If **Full month** is ticked for an employee on a given month, the base pay
+switches from days-worked × day rate to their flat monthly salary (annual
+wage ÷ 12) — days worked is disabled since it's no longer used. Extra hours
+and missing hours stay editable and still adjust pay on top, so you can still
+account for the odd extra or missing hour in an otherwise full month.
+
 ## 1. Database setup (Supabase)
 
 If this is a fresh Supabase project, in the SQL editor:
@@ -38,10 +44,14 @@ If this is a fresh Supabase project, in the SQL editor:
    access. There's no self-service sign-up screen on purpose — you control
    who gets an account.
 
-If you already ran an earlier version of `schema.sql`, just run
-`migration_002_holiday.sql` instead — it adds the new columns (`start_date`,
-`holiday_entitlement_days` on employees, `holiday_days` on timesheets)
-without touching your existing data.
+If you already ran an earlier version of `schema.sql`, run whichever
+migrations you're missing, in order:
+1. `migration_002_holiday.sql` — adds `start_date`, `holiday_entitlement_days`
+   on employees and `holiday_days` on timesheets.
+2. `migration_003_full_month.sql` — adds `full_month` on timesheets (the
+   "pay full month" checkbox).
+
+Both are safe to run on an existing database — they don't touch existing data.
 
 ## 2. Run it locally
 
@@ -82,10 +92,11 @@ actually controls access. `.env` is git-ignored so it won't get committed.
   holiday entitlement.
 - **Monthly Timesheet** page — create a new month with "+ New month", pick
   any month from the tabs, and for each employee enter days worked, holiday
-  days, extra hours, and missing hours. Click **Adjust** on a row to add or
-  remove named additions/deductions (Bonus, Glass Damage, etc.) — the gross
-  wage updates live. Every month you create stays in the tab list, so past
-  months remain visible and editable.
+  days, extra hours, and missing hours — or tick **Full month** to simply pay
+  their standard monthly salary for that period instead. Click **Adjust** on
+  a row to add or remove named additions/deductions (Bonus, Glass Damage,
+  etc.) — the gross wage updates live. Every month you create stays in the
+  tab list, so past months remain visible and editable.
 - **Holiday Report** page — pick a year and see, per employee, their annual
   entitlement, days taken (summed from every month's timesheet that year),
   and days remaining. For anyone who started partway through the year,
