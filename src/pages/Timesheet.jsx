@@ -106,12 +106,11 @@ export default function Timesheet() {
     loadPeriodData()
   }, [loadPeriodData])
 
-  async function createMonth(e) {
-    e.preventDefault()
+  async function createPeriod(year, month) {
     setError(null)
     const { data, error } = await supabase
       .from('pay_periods')
-      .insert({ year: Number(newYear), month: Number(newMonth) })
+      .insert({ year, month })
       .select('*')
       .single()
     if (error) {
@@ -121,6 +120,25 @@ export default function Timesheet() {
     setShowNewMonth(false)
     await loadPeriods()
     setSelectedPeriodId(data.id)
+  }
+
+  async function createMonth(e) {
+    e.preventDefault()
+    await createPeriod(Number(newYear), Number(newMonth))
+  }
+
+  function addNextMonth() {
+    // Base it on the latest period that exists, so "+1 Month" always
+    // advances from wherever the ledger currently ends. Falls back to
+    // the current calendar month if no periods exist yet.
+    const latest = periods[0]
+    let year = latest ? latest.year : today.getFullYear()
+    let month = latest ? latest.month + 1 : today.getMonth() + 1
+    if (month > 12) {
+      month = 1
+      year += 1
+    }
+    createPeriod(year, month)
   }
 
   async function updateField(row, field, value) {
@@ -158,9 +176,14 @@ export default function Timesheet() {
           <div className="page-eyebrow">Wage calculator</div>
           <h1 className="page-title">Monthly Timesheet</h1>
         </div>
-        <button className="btn btn-brass" onClick={() => setShowNewMonth((s) => !s)}>
-          + New month
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-outline" onClick={addNextMonth} title="Create the month right after the latest one">
+            +1 Month
+          </button>
+          <button className="btn btn-brass" onClick={() => setShowNewMonth((s) => !s)}>
+            + New month
+          </button>
+        </div>
       </div>
 
       {error && <div className="login-error">{error}</div>}
