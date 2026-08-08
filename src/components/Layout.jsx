@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient'
 const NAV_ITEMS = [
   { key: 'timesheet', label: 'Monthly Timesheet' },
   { key: 'employees', label: 'Employees' },
+  { key: 'holiday', label: 'Holiday Report' },
 ]
 
 export default function Layout({ page, setPage, userEmail, children }) {
@@ -10,7 +11,7 @@ export default function Layout({ page, setPage, userEmail, children }) {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">IFK Ledger</div>
+          <div className="brand-mark">Carglass</div>
           <div className="brand-sub">Wage & Timesheet</div>
         </div>
         <nav className="nav">

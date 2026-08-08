@@ -7,6 +7,8 @@ create table if not exists employees (
   annual_wage numeric(12,2) not null,
   working_days_per_year numeric(6,2) not null default 253,
   working_hours_per_day numeric(6,2) not null default 8.5,
+  start_date date,
+  holiday_entitlement_days numeric(6,2) not null default 28,
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -27,6 +29,7 @@ create table if not exists timesheets (
   days_worked numeric(6,2) not null default 0,
   extra_hours numeric(6,2) not null default 0,
   missing_hours numeric(6,2) not null default 0,
+  holiday_days numeric(6,2) not null default 0,
   notes text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

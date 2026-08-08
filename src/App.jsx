@@ -4,6 +4,7 @@ import Login from './components/Login'
 import Layout from './components/Layout'
 import Timesheet from './pages/Timesheet'
 import Employees from './pages/Employees'
+import HolidayReport from './pages/HolidayReport'
 
 export default function App() {
   const [session, setSession] = useState(undefined) // undefined = loading, null = signed out
@@ -31,6 +32,7 @@ export default function App() {
     <Layout page={page} setPage={setPage} userEmail={session.user.email}>
       {page === 'timesheet' && <Timesheet />}
       {page === 'employees' && <Employees />}
+      {page === 'holiday' && <HolidayReport />}
     </Layout>
   )
 }

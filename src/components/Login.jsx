@@ -19,7 +19,7 @@ export default function Login() {
   return (
     <div className="login-screen">
       <div className="login-card">
-        <h1>IFK Wage Ledger</h1>
+        <h1>Carglass Wage Ledger</h1>
         <p className="sub">Sign in to view or edit timesheets.</p>
 
         {error && <div className="login-error">{error}</div>}

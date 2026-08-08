@@ -68,6 +68,7 @@ export default function Timesheet() {
         days_worked: 0,
         extra_hours: 0,
         missing_hours: 0,
+        holiday_days: 0,
       }))
       const { data: created, error: insErr } = await supabase
         .from('timesheets')
@@ -229,6 +230,7 @@ export default function Timesheet() {
               <tr>
                 <th>Employee</th>
                 <th className="num">Days worked</th>
+                <th className="num">Holiday days</th>
                 <th className="num">Extra hrs</th>
                 <th className="num">Missing hrs</th>
                 <th className="num">Adjustments</th>
@@ -248,6 +250,15 @@ export default function Timesheet() {
                         step="0.5"
                         defaultValue={row.days_worked}
                         onBlur={(e) => updateField(row, 'days_worked', e.target.value)}
+                      />
+                    </td>
+                    <td className="num">
+                      <input
+                        className="cell-input"
+                        type="number"
+                        step="0.5"
+                        defaultValue={row.holiday_days}
+                        onBlur={(e) => updateField(row, 'holiday_days', e.target.value)}
                       />
                     </td>
                     <td className="num">
@@ -291,7 +302,7 @@ export default function Timesheet() {
                   </tr>
                   {expandedRow === row.id && (
                     <tr>
-                      <td colSpan={7} style={{ background: 'var(--paper-shade)' }}>
+                      <td colSpan={8} style={{ background: 'var(--paper-shade)' }}>
                         <AdjustmentsEditor
                           timesheetId={row.id}
                           adjustments={adj}

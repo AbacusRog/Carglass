@@ -7,6 +7,8 @@ const BLANK_FORM = {
   annual_wage: '',
   working_days_per_year: 253,
   working_hours_per_day: 8.5,
+  start_date: '',
+  holiday_entitlement_days: 28,
 }
 
 export default function Employees() {
@@ -43,6 +45,8 @@ export default function Employees() {
       annual_wage: emp.annual_wage,
       working_days_per_year: emp.working_days_per_year,
       working_hours_per_day: emp.working_hours_per_day,
+      start_date: emp.start_date || '',
+      holiday_entitlement_days: emp.holiday_entitlement_days,
     })
     setEditingId(emp.id)
   }
@@ -56,6 +60,8 @@ export default function Employees() {
       annual_wage: Number(form.annual_wage),
       working_days_per_year: Number(form.working_days_per_year),
       working_hours_per_day: Number(form.working_hours_per_day),
+      start_date: form.start_date || null,
+      holiday_entitlement_days: Number(form.holiday_entitlement_days),
       updated_at: new Date().toISOString(),
     }
 
@@ -153,6 +159,24 @@ export default function Employees() {
               required
             />
           </div>
+          <div className="field">
+            <label>Start date</label>
+            <input
+              type="date"
+              value={form.start_date}
+              onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+            />
+          </div>
+          <div className="field">
+            <label>Holiday entitlement (days/yr)</label>
+            <input
+              type="number"
+              step="0.5"
+              value={form.holiday_entitlement_days}
+              onChange={(e) => setForm({ ...form, holiday_entitlement_days: e.target.value })}
+              required
+            />
+          </div>
           <div className="field" style={{ justifyContent: 'flex-end' }}>
             <label>&nbsp;</label>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -189,6 +213,8 @@ export default function Employees() {
               <th className="num">Hourly rate</th>
               <th className="num">Days/yr</th>
               <th className="num">Hrs/day</th>
+              <th>Start date</th>
+              <th className="num">Holiday/yr</th>
               <th></th>
             </tr>
           </thead>
@@ -204,6 +230,8 @@ export default function Employees() {
                 <td className="num">{formatCurrency(hourlyRate(emp))}</td>
                 <td className="num">{emp.working_days_per_year}</td>
                 <td className="num">{emp.working_hours_per_day}</td>
+                <td>{emp.start_date || <span className="helper-text">—</span>}</td>
+                <td className="num">{emp.holiday_entitlement_days}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                     <button className="btn btn-outline btn-sm" onClick={() => startEdit(emp)}>

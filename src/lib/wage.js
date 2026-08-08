@@ -18,13 +18,14 @@ export function monthlyRate(employee) {
   return employee.annual_wage / 12
 }
 
-// timesheet: { days_worked, extra_hours, missing_hours }
+// timesheet: { days_worked, extra_hours, missing_hours, holiday_days }
 // adjustments: [{ kind: 'addition' | 'deduction', amount }]
 export function grossWage(employee, timesheet, adjustments = []) {
   const dr = dayRate(employee)
   const hr = hourlyRate(employee)
 
-  const base = (timesheet.days_worked || 0) * dr
+  // Holiday days are paid leave, so they're paid at the day rate just like days worked.
+  const base = ((timesheet.days_worked || 0) + (timesheet.holiday_days || 0)) * dr
   const extraPay = (timesheet.extra_hours || 0) * hr
   const missingDeduction = (timesheet.missing_hours || 0) * hr
 
