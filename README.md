@@ -66,6 +66,10 @@ migrations you're missing, in order:
    in the rate for every existing month first.
 5. `migration_006_address_ni.sql` — adds `address` and `ni_number` on
    employees.
+6. `migration_007_adjustment_types.sql` — adds an `adjustment_types` table
+   that remembers every addition/deduction label you've used, so you can
+   pick from a dropdown instead of retyping. It also seeds itself from
+   whatever labels already exist on your current adjustments.
 
 Both are safe to run on an existing database — they don't touch existing data.
 
@@ -113,9 +117,13 @@ actually controls access. `.env` is git-ignored so it won't get committed.
   any month from the tabs, and for each employee enter days worked, holiday
   days, extra hours, and missing hours — or tick **Full month** to simply pay
   their standard monthly salary for that period instead. Click **Adjust** on
-  a row to add or remove named additions/deductions (Bonus, Glass Damage,
-  etc.) — the gross wage updates live. Every month you create stays in the
-  tab list, so past months remain visible and editable.
+  a row to add additions/deductions: pick a previously used label from the
+  dropdown, or choose "+ New label…" to add one — it's remembered for next
+  time. Existing entries and saved labels can both be edited or removed
+  (click "Manage saved types" to rename or delete a label from the list;
+  removing it doesn't touch entries that already used it). The gross wage
+  updates live. Every month you create stays in the tab list, so past
+  months remain visible and editable.
 - **Holiday Report** page — pick a year and see, per employee, their annual
   entitlement, days taken (summed from every month's timesheet that year),
   and days remaining. For anyone who started partway through the year,

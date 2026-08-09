@@ -52,11 +52,20 @@ create table if not exists adjustments (
   created_at timestamptz not null default now()
 );
 
+create table if not exists adjustment_types (
+  id uuid primary key default gen_random_uuid(),
+  label text not null,
+  kind text not null check (kind in ('addition', 'deduction')),
+  created_at timestamptz not null default now(),
+  unique (label, kind)
+);
+
 -- Row Level Security
 alter table employees enable row level security;
 alter table pay_periods enable row level security;
 alter table timesheets enable row level security;
 alter table adjustments enable row level security;
+alter table adjustment_types enable row level security;
 
 -- Only signed-in users can read/write (adjust later if you want public view)
 create policy "auth read employees" on employees for select using (auth.role() = 'authenticated');
@@ -70,3 +79,6 @@ create policy "auth write timesheets" on timesheets for all using (auth.role() =
 
 create policy "auth read adjustments" on adjustments for select using (auth.role() = 'authenticated');
 create policy "auth write adjustments" on adjustments for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+
+create policy "auth read adjustment_types" on adjustment_types for select using (auth.role() = 'authenticated');
+create policy "auth write adjustment_types" on adjustment_types for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
