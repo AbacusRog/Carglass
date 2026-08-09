@@ -64,6 +64,8 @@ migrations you're missing, in order:
    timesheets, so editing an employee's pay only affects months created
    afterward. **Run this before you next change anyone's wage** — it locks
    in the rate for every existing month first.
+5. `migration_006_address_ni.sql` — adds `address` and `ni_number` on
+   employees.
 
 Both are safe to run on an existing database — they don't touch existing data.
 
@@ -103,9 +105,10 @@ actually controls access. `.env` is git-ignored so it won't get committed.
 
 - **Employees** page — add, edit, remove (soft-remove or fully delete), and
   set each person's annual wage, working days/hours, start date, leave date,
-  and annual holiday entitlement. Setting a leave date stops that employee
-  being added to any newly created month after the one they left — their
-  existing timesheet history is untouched, so past months still show them.
+  address, National Insurance number, and annual holiday entitlement.
+  Setting a leave date stops that employee being added to any newly created
+  month after the one they left — their existing timesheet history is
+  untouched, so past months still show them.
 - **Monthly Timesheet** page — create a new month with "+ New month", pick
   any month from the tabs, and for each employee enter days worked, holiday
   days, extra hours, and missing hours — or tick **Full month** to simply pay

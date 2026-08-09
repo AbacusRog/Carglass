@@ -9,6 +9,8 @@ const BLANK_FORM = {
   working_hours_per_day: 8.5,
   start_date: '',
   leave_date: '',
+  address: '',
+  ni_number: '',
   holiday_entitlement_days: 28,
 }
 
@@ -48,6 +50,8 @@ export default function Employees() {
       working_hours_per_day: emp.working_hours_per_day,
       start_date: emp.start_date || '',
       leave_date: emp.leave_date || '',
+      address: emp.address || '',
+      ni_number: emp.ni_number || '',
       holiday_entitlement_days: emp.holiday_entitlement_days,
     })
     setEditingId(emp.id)
@@ -64,6 +68,8 @@ export default function Employees() {
       working_hours_per_day: Number(form.working_hours_per_day),
       start_date: form.start_date || null,
       leave_date: form.leave_date || null,
+      address: form.address.trim() || null,
+      ni_number: form.ni_number.trim() || null,
       holiday_entitlement_days: Number(form.holiday_entitlement_days),
       updated_at: new Date().toISOString(),
     }
@@ -188,6 +194,26 @@ export default function Employees() {
               required
             />
           </div>
+        </div>
+
+        <div className="field-row">
+          <div className="field" style={{ flex: '1 1 260px' }}>
+            <label>Address</label>
+            <input
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="Home address"
+              style={{ minWidth: 260 }}
+            />
+          </div>
+          <div className="field">
+            <label>National Insurance number</label>
+            <input
+              value={form.ni_number}
+              onChange={(e) => setForm({ ...form, ni_number: e.target.value.toUpperCase() })}
+              placeholder="e.g. QQ 12 34 56 C"
+            />
+          </div>
           <div className="field" style={{ justifyContent: 'flex-end' }}>
             <label>&nbsp;</label>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -233,6 +259,8 @@ export default function Employees() {
               <th>Start date</th>
               <th>Leave date</th>
               <th className="num">Holiday/yr</th>
+              <th>Address</th>
+              <th>NI number</th>
               <th></th>
             </tr>
           </thead>
@@ -257,6 +285,10 @@ export default function Employees() {
                   )}
                 </td>
                 <td className="num">{emp.holiday_entitlement_days}</td>
+                <td style={{ maxWidth: 200, whiteSpace: 'normal' }}>
+                  {emp.address || <span className="helper-text">—</span>}
+                </td>
+                <td>{emp.ni_number || <span className="helper-text">—</span>}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                     <button className="btn btn-outline btn-sm" onClick={() => startEdit(emp)}>
