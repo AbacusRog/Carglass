@@ -50,6 +50,7 @@ migrations you're missing, in order:
    on employees and `holiday_days` on timesheets.
 2. `migration_003_full_month.sql` — adds `full_month` on timesheets (the
    "pay full month" checkbox).
+3. `migration_004_leave_date.sql` — adds `leave_date` on employees.
 
 Both are safe to run on an existing database — they don't touch existing data.
 
@@ -88,8 +89,10 @@ actually controls access. `.env` is git-ignored so it won't get committed.
 ## Using the app
 
 - **Employees** page — add, edit, remove (soft-remove or fully delete), and
-  set each person's annual wage, working days/hours, start date, and annual
-  holiday entitlement.
+  set each person's annual wage, working days/hours, start date, leave date,
+  and annual holiday entitlement. Setting a leave date stops that employee
+  being added to any newly created month after the one they left — their
+  existing timesheet history is untouched, so past months still show them.
 - **Monthly Timesheet** page — create a new month with "+ New month", pick
   any month from the tabs, and for each employee enter days worked, holiday
   days, extra hours, and missing hours — or tick **Full month** to simply pay

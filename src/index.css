@@ -272,6 +272,17 @@ input, select {
   vertical-align: middle;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+
+.table-scroll .ledger-table {
+  min-width: 720px;
+}
+
 .ledger-table tbody tr:hover {
   background: rgba(201, 162, 39, 0.06);
 }
@@ -533,4 +544,128 @@ input, select {
   font-family: var(--font-mono);
   font-size: 20px;
   font-weight: 600;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 780px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--ink-line);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .brand {
+    padding: 0 14px 0 0;
+    margin-bottom: 0;
+    margin-right: 10px;
+    border-bottom: none;
+    border-right: 1px solid var(--ink-line);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .nav {
+    flex-direction: row;
+    padding: 0;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .nav-item {
+    white-space: nowrap;
+    padding: 8px 10px;
+  }
+
+  .sidebar-footer {
+    margin-top: 0;
+    margin-left: auto;
+    padding: 0 0 0 14px;
+    border-top: none;
+    border-left: 1px solid var(--ink-line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .user-email {
+    display: none;
+  }
+
+  .signout-btn {
+    width: auto;
+    white-space: nowrap;
+    padding: 6px 10px;
+  }
+
+  .main {
+    padding: 16px;
+  }
+
+  .paper {
+    padding: 20px 16px;
+    border-radius: 6px;
+  }
+
+  .paper::before {
+    display: none;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .page-header > div:last-child,
+  .page-header > button {
+    width: 100%;
+  }
+
+  .field-row {
+    gap: 10px;
+  }
+
+  .field {
+    flex: 1 1 140px;
+  }
+
+  .field input, .field select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .summary-strip {
+    gap: 10px;
+  }
+
+  .summary-card {
+    flex: 1 1 130px;
+    min-width: 0;
+  }
+
+  .login-card {
+    padding: 32px 24px;
+    max-width: none;
+    margin: 0 16px;
+  }
 }

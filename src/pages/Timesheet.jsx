@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../supabaseClient'
-import { grossWage, formatCurrency, monthLabel, MONTH_NAMES, isCurrentlyActive } from '../lib/wage'
+import { grossWage, formatCurrency, monthLabel, MONTH_NAMES } from '../lib/wage'
 import AdjustmentsEditor from '../components/AdjustmentsEditor'
 
 const today = new Date()
@@ -44,23 +44,36 @@ export default function Timesheet() {
     setLoading(true)
     setError(null)
 
-    const [{ data: emps, error: empErr }, { data: ts, error: tsErr }] = await Promise.all([
+    const [{ data: emps, error: empErr }, { data: ts, error: tsErr }, { data: periodRow, error: perRowErr }] = await Promise.all([
       supabase.from('employees').select('*').order('name'),
       supabase.from('timesheets').select('*').eq('pay_period_id', selectedPeriodId),
+      supabase.from('pay_periods').select('*').eq('id', selectedPeriodId).single(),
     ])
 
     if (empErr) setError(empErr.message)
     if (tsErr) setError(tsErr.message)
+    if (perRowErr) setError(perRowErr.message)
 
     setEmployees(emps || [])
 
-    // Ensure every active employee (or one already with a row) has a timesheet row.
+    // Ensure every active employee (or one already with a row) has a timesheet row —
+    // unless they have a leave date earlier than this period's month, in which case
+    // they're left out of newly created months but their existing history stays intact.
     const existingByEmployee = {}
     ;(ts || []).forEach((row) => {
       existingByEmployee[row.employee_id] = row
     })
 
-    const missing = (emps || []).filter((e) => isCurrentlyActive(e) && !existingByEmployee[e.id])
+    const missing = (emps || []).filter((e) => {
+      if (!e.active || existingByEmployee[e.id]) return false
+      if (e.leave_date && periodRow) {
+        const [leaveYear, leaveMonth] = e.leave_date.split('-').map(Number)
+        const afterLeave =
+          periodRow.year > leaveYear || (periodRow.year === leaveYear && periodRow.month > leaveMonth)
+        if (afterLeave) return false
+      }
+      return true
+    })
     if (missing.length) {
       const inserts = missing.map((e) => ({
         employee_id: e.id,
@@ -150,7 +163,7 @@ export default function Timesheet() {
   }
 
   const selectedPeriod = periods.find((p) => p.id === selectedPeriodId)
-  const activeEmployees = employees.filter((e) => isCurrentlyActive(e))
+  const activeEmployees = employees.filter((e) => e.active)
 
   const rowsWithTotals = timesheets
     .map((row) => {
@@ -161,7 +174,7 @@ export default function Timesheet() {
       return { row, emp, adj, totals }
     })
     .filter(Boolean)
-    .filter(({ emp }) => isCurrentlyActive(emp))
+    .filter(({ emp }) => emp.active)
     .sort((a, b) => a.emp.name.localeCompare(b.emp.name))
 
   const periodGrossTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.gross, 0)
@@ -242,6 +255,7 @@ export default function Timesheet() {
             </div>
           </div>
 
+          <div className="table-scroll">
           <table className="ledger-table">
             <thead>
               <tr>
@@ -342,6 +356,7 @@ export default function Timesheet() {
               ))}
             </tbody>
           </table>
+          </div>
         </>
       )}
     </div>

@@ -60,15 +60,6 @@ export function grossWage(employee, timesheet, adjustments = []) {
   }
 }
 
-// An employee counts as currently active if the active flag is set and
-// they either have no leave date or it hasn't arrived yet.
-export function isCurrentlyActive(employee, today = new Date()) {
-  if (!employee.active) return false
-  if (!employee.leave_date) return true
-  const todayIso = today.toISOString().slice(0, 10)
-  return employee.leave_date > todayIso
-}
-
 export function formatCurrency(value) {
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { dayRate, hourlyRate, monthlyRate, formatCurrency, isCurrentlyActive } from '../lib/wage'
+import { dayRate, hourlyRate, monthlyRate, formatCurrency } from '../lib/wage'
 
 const BLANK_FORM = {
   name: '',
@@ -68,13 +68,6 @@ export default function Employees() {
       updated_at: new Date().toISOString(),
     }
 
-    // A leave date that has already arrived means the employee has left —
-    // mark them inactive automatically rather than relying on a manual toggle.
-    const todayIso = new Date().toISOString().slice(0, 10)
-    if (payload.leave_date && payload.leave_date <= todayIso) {
-      payload.active = false
-    }
-
     if (!payload.name || !payload.annual_wage) {
       setError('Name and annual wage are required.')
       return
@@ -111,7 +104,7 @@ export default function Employees() {
     loadEmployees()
   }
 
-  const visible = employees.filter((e) => showInactive || isCurrentlyActive(e))
+  const visible = employees.filter((e) => showInactive || e.active)
 
   return (
     <div className="paper">
@@ -211,6 +204,11 @@ export default function Employees() {
         </div>
       </form>
 
+      <p className="helper-text" style={{ marginTop: -10, marginBottom: 20 }}>
+        Setting a leave date stops that employee being added to any newly created month
+        after the month they left — their existing timesheet history is untouched.
+      </p>
+
       <div className="section-title">Roster</div>
 
       {loading ? (
@@ -221,6 +219,7 @@ export default function Employees() {
           <p>Add your first employee above to start building timesheets.</p>
         </div>
       ) : (
+        <div className="table-scroll">
         <table className="ledger-table">
           <thead>
             <tr>
@@ -239,9 +238,9 @@ export default function Employees() {
           </thead>
           <tbody>
             {visible.map((emp) => (
-              <tr key={emp.id} style={{ opacity: isCurrentlyActive(emp) ? 1 : 0.5 }}>
+              <tr key={emp.id} style={{ opacity: emp.active ? 1 : 0.5 }}>
                 <td>
-                  {emp.name} {!isCurrentlyActive(emp) && <span className="pill pill-red">Removed</span>}
+                  {emp.name} {!emp.active && <span className="pill pill-red">Removed</span>}
                 </td>
                 <td className="num">{formatCurrency(emp.annual_wage)}</td>
                 <td className="num">{formatCurrency(monthlyRate(emp))}</td>
@@ -250,7 +249,13 @@ export default function Employees() {
                 <td className="num">{emp.working_days_per_year}</td>
                 <td className="num">{emp.working_hours_per_day}</td>
                 <td>{emp.start_date || <span className="helper-text">—</span>}</td>
-                <td>{emp.leave_date || <span className="helper-text">—</span>}</td>
+                <td>
+                  {emp.leave_date ? (
+                    <span className="pill pill-red">{emp.leave_date}</span>
+                  ) : (
+                    <span className="helper-text">—</span>
+                  )}
+                </td>
                 <td className="num">{emp.holiday_entitlement_days}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
@@ -269,6 +274,7 @@ export default function Employees() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   )

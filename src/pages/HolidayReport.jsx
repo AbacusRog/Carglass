@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../supabaseClient'
-import { isCurrentlyActive } from '../lib/wage'
 
 export default function HolidayReport() {
   const [employees, setEmployees] = useState([])
@@ -18,7 +17,7 @@ export default function HolidayReport() {
       ])
       if (empErr) setError(empErr.message)
       if (perErr) setError(perErr.message)
-      setEmployees((emps || []).filter(isCurrentlyActive))
+      setEmployees(emps || [])
       const years = [...new Set((periods || []).map((p) => p.year))]
       if (!years.includes(new Date().getFullYear())) years.unshift(new Date().getFullYear())
       years.sort((a, b) => b - a)
@@ -98,12 +97,12 @@ export default function HolidayReport() {
           <p>Add employees on the Employees page first.</p>
         </div>
       ) : (
+        <div className="table-scroll">
         <table className="ledger-table">
           <thead>
             <tr>
               <th>Employee</th>
               <th>Start date</th>
-              <th>Leave date</th>
               <th className="num">Entitlement (days)</th>
               <th className="num">Taken in {year}</th>
               <th className="num">Remaining</th>
@@ -117,7 +116,6 @@ export default function HolidayReport() {
                 <tr key={emp.id}>
                   <td>{emp.name}</td>
                   <td>{emp.start_date || <span className="helper-text">—</span>}</td>
-                  <td>{emp.leave_date || <span className="helper-text">—</span>}</td>
                   <td className="num">{emp.holiday_entitlement_days}</td>
                   <td className="num">{taken}</td>
                   <td className="num">
@@ -130,6 +128,7 @@ export default function HolidayReport() {
             })}
           </tbody>
         </table>
+        </div>
       )}
 
       <p className="helper-text" style={{ marginTop: 16 }}>
