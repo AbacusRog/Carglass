@@ -9,6 +9,8 @@ create table if not exists employees (
   working_hours_per_day numeric(6,2) not null default 8.5,
   start_date date,
   leave_date date,
+  date_of_birth date,
+  email text,
   address text,
   ni_number text,
   holiday_entitlement_days numeric(6,2) not null default 28,

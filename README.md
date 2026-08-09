@@ -70,6 +70,8 @@ migrations you're missing, in order:
    that remembers every addition/deduction label you've used, so you can
    pick from a dropdown instead of retyping. It also seeds itself from
    whatever labels already exist on your current adjustments.
+7. `migration_008_dob_email.sql` — adds `date_of_birth` and `email` on
+   employees.
 
 Both are safe to run on an existing database — they don't touch existing data.
 
@@ -109,10 +111,10 @@ actually controls access. `.env` is git-ignored so it won't get committed.
 
 - **Employees** page — add, edit, remove (soft-remove or fully delete), and
   set each person's annual wage, working days/hours, start date, leave date,
-  address, National Insurance number, and annual holiday entitlement.
-  Setting a leave date stops that employee being added to any newly created
-  month after the one they left — their existing timesheet history is
-  untouched, so past months still show them.
+  date of birth, email, address, National Insurance number, and annual
+  holiday entitlement. Setting a leave date stops that employee being added
+  to any newly created month after the one they left — their existing
+  timesheet history is untouched, so past months still show them.
 - **Monthly Timesheet** page — create a new month with "+ New month", pick
   any month from the tabs, and for each employee enter days worked, holiday
   days, extra hours, and missing hours — or tick **Full month** to simply pay

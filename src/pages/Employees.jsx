@@ -9,6 +9,8 @@ const BLANK_FORM = {
   working_hours_per_day: 8.5,
   start_date: '',
   leave_date: '',
+  date_of_birth: '',
+  email: '',
   address: '',
   ni_number: '',
   holiday_entitlement_days: 28,
@@ -50,6 +52,8 @@ export default function Employees() {
       working_hours_per_day: emp.working_hours_per_day,
       start_date: emp.start_date || '',
       leave_date: emp.leave_date || '',
+      date_of_birth: emp.date_of_birth || '',
+      email: emp.email || '',
       address: emp.address || '',
       ni_number: emp.ni_number || '',
       holiday_entitlement_days: emp.holiday_entitlement_days,
@@ -68,6 +72,8 @@ export default function Employees() {
       working_hours_per_day: Number(form.working_hours_per_day),
       start_date: form.start_date || null,
       leave_date: form.leave_date || null,
+      date_of_birth: form.date_of_birth || null,
+      email: form.email.trim() || null,
       address: form.address.trim() || null,
       ni_number: form.ni_number.trim() || null,
       holiday_entitlement_days: Number(form.holiday_entitlement_days),
@@ -185,6 +191,23 @@ export default function Employees() {
             />
           </div>
           <div className="field">
+            <label>Date of birth</label>
+            <input
+              type="date"
+              value={form.date_of_birth}
+              onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })}
+            />
+          </div>
+          <div className="field">
+            <label>Email</label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="name@example.com"
+            />
+          </div>
+          <div className="field">
             <label>Holiday entitlement (days/yr)</label>
             <input
               type="number"
@@ -258,6 +281,8 @@ export default function Employees() {
               <th className="num">Hrs/day</th>
               <th>Start date</th>
               <th>Leave date</th>
+              <th>Date of birth</th>
+              <th>Email</th>
               <th className="num">Holiday/yr</th>
               <th>Address</th>
               <th>NI number</th>
@@ -284,6 +309,8 @@ export default function Employees() {
                     <span className="helper-text">—</span>
                   )}
                 </td>
+                <td>{emp.date_of_birth || <span className="helper-text">—</span>}</td>
+                <td>{emp.email || <span className="helper-text">—</span>}</td>
                 <td className="num">{emp.holiday_entitlement_days}</td>
                 <td style={{ maxWidth: 200, whiteSpace: 'normal' }}>
                   {emp.address || <span className="helper-text">—</span>}
