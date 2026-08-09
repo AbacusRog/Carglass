@@ -3,26 +3,41 @@
 //   day rate     = annual wage / working days per year
 //   hourly rate  = annual wage / (working days per year * working hours per day)
 
-export function dayRate(employee) {
-  return employee.annual_wage / employee.working_days_per_year
+export function dayRate(rateSource) {
+  return rateSource.annual_wage / rateSource.working_days_per_year
 }
 
-export function hourlyRate(employee) {
+export function hourlyRate(rateSource) {
   return (
-    employee.annual_wage /
-    (employee.working_days_per_year * employee.working_hours_per_day)
+    rateSource.annual_wage /
+    (rateSource.working_days_per_year * rateSource.working_hours_per_day)
   )
 }
 
-export function monthlyRate(employee) {
-  return employee.annual_wage / 12
+export function monthlyRate(rateSource) {
+  return rateSource.annual_wage / 12
 }
 
-// timesheet: { days_worked, extra_hours, missing_hours, holiday_days, full_month }
+// Each timesheet row snapshots the employee's wage/hours as they stood when
+// that month's row was first created, so editing an employee's pay later
+// only affects months created from then on — months already generated keep
+// the rate they were paid at. Older rows created before this snapshot
+// existed fall back to the employee's current record.
+export function rateSourceFor(employee, timesheet) {
+  return {
+    annual_wage: timesheet.annual_wage ?? employee.annual_wage,
+    working_days_per_year: timesheet.working_days_per_year ?? employee.working_days_per_year,
+    working_hours_per_day: timesheet.working_hours_per_day ?? employee.working_hours_per_day,
+  }
+}
+
+// timesheet: { days_worked, extra_hours, missing_hours, holiday_days, full_month,
+//              annual_wage, working_days_per_year, working_hours_per_day }
 // adjustments: [{ kind: 'addition' | 'deduction', amount }]
 export function grossWage(employee, timesheet, adjustments = []) {
-  const dr = dayRate(employee)
-  const hr = hourlyRate(employee)
+  const rateSource = rateSourceFor(employee, timesheet)
+  const dr = dayRate(rateSource)
+  const hr = hourlyRate(rateSource)
 
   let base, extraPay, missingDeduction
 
@@ -30,7 +45,7 @@ export function grossWage(employee, timesheet, adjustments = []) {
     // Full month worked: pay the flat monthly salary rather than
     // building it up from days worked, but extra/missing hours can
     // still adjust it on top.
-    base = monthlyRate(employee)
+    base = monthlyRate(rateSource)
     extraPay = (timesheet.extra_hours || 0) * hr
     missingDeduction = (timesheet.missing_hours || 0) * hr
   } else {

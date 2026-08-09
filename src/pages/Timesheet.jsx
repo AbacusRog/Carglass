@@ -83,6 +83,9 @@ export default function Timesheet() {
         missing_hours: 0,
         holiday_days: 0,
         full_month: false,
+        annual_wage: e.annual_wage,
+        working_days_per_year: e.working_days_per_year,
+        working_hours_per_day: e.working_hours_per_day,
       }))
       const { data: created, error: insErr } = await supabase
         .from('timesheets')

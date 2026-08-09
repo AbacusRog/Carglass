@@ -30,6 +30,15 @@ wage ÷ 12) — days worked is disabled since it's no longer used. Extra hours
 and missing hours stay editable and still adjust pay on top, so you can still
 account for the odd extra or missing hour in an otherwise full month.
 
+**Wage changes only affect months created afterward.** Each month's
+timesheet row locks in the employee's annual wage, working days/year, and
+working hours/day at the moment that month is first created (i.e. the
+moment it first appears in the tab list). If you edit an employee's pay
+later, every month already on the books keeps calculating at the old rate —
+only months you create from then on pick up the new one. So to have a raise
+apply starting in a specific month, update the employee's pay *before*
+creating that month.
+
 ## 1. Database setup (Supabase)
 
 If this is a fresh Supabase project, in the SQL editor:
@@ -51,6 +60,10 @@ migrations you're missing, in order:
 2. `migration_003_full_month.sql` — adds `full_month` on timesheets (the
    "pay full month" checkbox).
 3. `migration_004_leave_date.sql` — adds `leave_date` on employees.
+4. `migration_005_wage_snapshot.sql` — adds a wage-rate snapshot to
+   timesheets, so editing an employee's pay only affects months created
+   afterward. **Run this before you next change anyone's wage** — it locks
+   in the rate for every existing month first.
 
 Both are safe to run on an existing database — they don't touch existing data.
 
