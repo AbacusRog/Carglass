@@ -181,6 +181,8 @@ export default function Timesheet() {
     .sort((a, b) => a.emp.name.localeCompare(b.emp.name))
 
   const periodGrossTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.gross, 0)
+  const periodDeductionsTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.deductions, 0)
+  const periodNetTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.net, 0)
 
   return (
     <div className="paper">
@@ -249,8 +251,16 @@ export default function Timesheet() {
         <>
           <div className="summary-strip">
             <div className="summary-card">
-              <div className="label">{selectedPeriod && monthLabel(selectedPeriod.year, selectedPeriod.month)}</div>
+              <div className="label">{selectedPeriod && monthLabel(selectedPeriod.year, selectedPeriod.month)} — Gross</div>
               <div className="value">{formatCurrency(periodGrossTotal)}</div>
+            </div>
+            <div className="summary-card">
+              <div className="label">Deductions</div>
+              <div className="value" style={{ color: 'var(--red-ledger)' }}>−{formatCurrency(periodDeductionsTotal)}</div>
+            </div>
+            <div className="summary-card">
+              <div className="label">Net pay</div>
+              <div className="value" style={{ color: 'var(--green-ledger)' }}>{formatCurrency(periodNetTotal)}</div>
             </div>
             <div className="summary-card">
               <div className="label">Employees paid</div>
@@ -268,8 +278,10 @@ export default function Timesheet() {
                 <th className="num">Holiday days</th>
                 <th className="num">Extra hrs</th>
                 <th className="num">Missing hrs</th>
-                <th className="num">Adjustments</th>
+                <th className="num">Additions</th>
+                <th className="num">Deductions</th>
                 <th className="num">Gross wage</th>
+                <th className="num">Net pay</th>
                 <th></th>
               </tr>
             </thead>
@@ -324,17 +336,21 @@ export default function Timesheet() {
                       />
                     </td>
                     <td className="num">
-                      {adj.length > 0 ? (
-                        <span>
-                          {totals.additions > 0 && <span className="pill pill-green">+{formatCurrency(totals.additions)}</span>}
-                          {' '}
-                          {totals.deductions > 0 && <span className="pill pill-red">−{formatCurrency(totals.deductions)}</span>}
-                        </span>
+                      {totals.additions > 0 ? (
+                        <span className="pill pill-green">+{formatCurrency(totals.additions)}</span>
+                      ) : (
+                        <span className="helper-text">—</span>
+                      )}
+                    </td>
+                    <td className="num">
+                      {totals.deductions > 0 ? (
+                        <span className="pill pill-red">−{formatCurrency(totals.deductions)}</span>
                       ) : (
                         <span className="helper-text">—</span>
                       )}
                     </td>
                     <td className="num gross-figure">{formatCurrency(totals.gross)}</td>
+                    <td className="num gross-figure">{formatCurrency(totals.net)}</td>
                     <td>
                       <button
                         className="btn btn-outline btn-sm"
@@ -346,7 +362,7 @@ export default function Timesheet() {
                   </tr>
                   {expandedRow === row.id && (
                     <tr>
-                      <td colSpan={9} style={{ background: 'var(--paper-shade)' }}>
+                      <td colSpan={11} style={{ background: 'var(--paper-shade)' }}>
                         <AdjustmentsEditor
                           timesheetId={row.id}
                           adjustments={adj}

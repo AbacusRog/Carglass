@@ -17,8 +17,15 @@ gross wage = ((days worked + holiday days) × day rate)
            + (extra hours × hourly rate)
            − (missing hours × hourly rate)
            + additions
-           − deductions
+
+net pay = gross wage − deductions
 ```
+
+Deductions (Glass Damage, etc.) come off **net pay**, not gross — gross wage
+is your total earnings before any deductions, which is the figure that
+matters for tax/NI purposes. The Monthly Timesheet page shows Gross wage,
+Deductions, and Net pay as separate figures, both per employee and as
+period totals, so the distinction is always visible.
 
 Holiday days are paid leave, so they're paid at the day rate just like days
 actually worked — they're just tracked in their own column so you can report

@@ -63,7 +63,11 @@ export function grossWage(employee, timesheet, adjustments = []) {
     .filter((a) => a.kind === 'deduction')
     .reduce((sum, a) => sum + Number(a.amount || 0), 0)
 
-  const gross = base + extraPay - missingDeduction + additions - deductions
+  // Gross wage is total earnings before deductions — additions (like a
+  // bonus) count toward it, but named deductions (like Glass Damage) are
+  // taken out of net pay afterward, not out of the gross figure.
+  const gross = base + extraPay - missingDeduction + additions
+  const net = gross - deductions
 
   return {
     base,
@@ -72,6 +76,7 @@ export function grossWage(employee, timesheet, adjustments = []) {
     additions,
     deductions,
     gross,
+    net,
   }
 }
 
