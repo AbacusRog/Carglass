@@ -1,3 +1,5 @@
+import { estimatePayBreakdown } from './tax'
+
 // Core wage math, mirrors the logic from the original rate sheet:
 //   monthly rate = annual wage / 12
 //   day rate     = annual wage / working days per year
@@ -67,7 +69,12 @@ export function grossWage(employee, timesheet, adjustments = []) {
   // bonus) count toward it, but named deductions (like Glass Damage) are
   // taken out of net pay afterward, not out of the gross figure.
   const gross = base + extraPay - missingDeduction + additions
-  const net = gross - deductions
+
+  // Estimated tax/NI are calculated on gross earnings (before ad-hoc
+  // deductions), matching how PAYE actually works — deductions like Glass
+  // Damage come off take-home pay afterward, not off taxable earnings.
+  const { incomeTax, employeeNI, employerNI } = estimatePayBreakdown(gross)
+  const estimatedNet = gross - incomeTax - employeeNI - deductions
 
   return {
     base,
@@ -76,7 +83,10 @@ export function grossWage(employee, timesheet, adjustments = []) {
     additions,
     deductions,
     gross,
-    net,
+    incomeTax,
+    employeeNI,
+    employerNI,
+    estimatedNet,
   }
 }
 

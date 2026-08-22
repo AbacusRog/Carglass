@@ -182,7 +182,9 @@ export default function Timesheet() {
 
   const periodGrossTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.gross, 0)
   const periodDeductionsTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.deductions, 0)
-  const periodNetTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.net, 0)
+  const periodNetTotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.estimatedNet, 0)
+  const periodEmployerNITotal = rowsWithTotals.reduce((sum, r) => sum + r.totals.employerNI, 0)
+  const periodTotalCost = periodGrossTotal + periodEmployerNITotal
 
   return (
     <div className="paper">
@@ -259,8 +261,16 @@ export default function Timesheet() {
               <div className="value" style={{ color: 'var(--red-ledger)' }}>−{formatCurrency(periodDeductionsTotal)}</div>
             </div>
             <div className="summary-card">
-              <div className="label">Net pay</div>
+              <div className="label">Estimated net pay</div>
               <div className="value" style={{ color: 'var(--green-ledger)' }}>{formatCurrency(periodNetTotal)}</div>
+            </div>
+            <div className="summary-card">
+              <div className="label">Employer's NI (est.)</div>
+              <div className="value">{formatCurrency(periodEmployerNITotal)}</div>
+            </div>
+            <div className="summary-card">
+              <div className="label">Total cost to employer</div>
+              <div className="value">{formatCurrency(periodTotalCost)}</div>
             </div>
             <div className="summary-card">
               <div className="label">Employees paid</div>
@@ -281,8 +291,9 @@ export default function Timesheet() {
                 <th className="num">Additions</th>
                 <th className="num">Deductions</th>
                 <th className="num">Gross wage</th>
-                <th className="num">Net pay</th>
-                <th></th>
+                <th className="num">Employer NI (est.)</th>
+                <th className="num">Estimated net pay</th>
+                <th className="num"></th>
               </tr>
             </thead>
             <tbody>
@@ -350,8 +361,9 @@ export default function Timesheet() {
                       )}
                     </td>
                     <td className="num gross-figure">{formatCurrency(totals.gross)}</td>
-                    <td className="num gross-figure">{formatCurrency(totals.net)}</td>
-                    <td>
+                    <td className="num">{formatCurrency(totals.employerNI)}</td>
+                    <td className="num gross-figure">{formatCurrency(totals.estimatedNet)}</td>
+                    <td className="num">
                       <button
                         className="btn btn-outline btn-sm"
                         onClick={() => setExpandedRow(expandedRow === row.id ? null : row.id)}
@@ -362,7 +374,7 @@ export default function Timesheet() {
                   </tr>
                   {expandedRow === row.id && (
                     <tr>
-                      <td colSpan={11} style={{ background: 'var(--paper-shade)' }}>
+                      <td colSpan={12} style={{ background: 'var(--paper-shade)' }}>
                         <AdjustmentsEditor
                           timesheetId={row.id}
                           adjustments={adj}
@@ -376,6 +388,14 @@ export default function Timesheet() {
             </tbody>
           </table>
           </div>
+
+          <p className="helper-text" style={{ marginTop: 16 }}>
+            Estimated net pay and Employer NI use standard 2026/27 UK PAYE rates
+            (England/Wales/NI, non-cumulative "Month 1" basis) applied to gross wage.
+            They don't account for tax codes, multiple jobs, Scottish rates, student
+            loans, or pension contributions — treat these as estimates, not exact
+            payroll figures.
+          </p>
         </>
       )}
     </div>

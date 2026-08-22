@@ -24,8 +24,24 @@ net pay = gross wage − deductions
 Deductions (Glass Damage, etc.) come off **net pay**, not gross — gross wage
 is your total earnings before any deductions, which is the figure that
 matters for tax/NI purposes. The Monthly Timesheet page shows Gross wage,
-Deductions, and Net pay as separate figures, both per employee and as
-period totals, so the distinction is always visible.
+Deductions, Employer NI, and Estimated net pay as separate figures, both per
+employee and as period totals, so the distinction is always visible.
+
+**Estimated net pay and Employer NI are calculated, not just labels.** The
+app applies standard 2026/27 UK PAYE rates (England/Wales/NI, non-cumulative
+"Month 1" basis — 1/12 of the annual thresholds applied to that month's
+gross) to estimate Income Tax, employee National Insurance, and employer
+National Insurance:
+
+```
+estimated net pay = gross wage − estimated income tax − estimated employee NI − deductions
+```
+
+This is a genuine estimate, not exact payroll — it doesn't know about tax
+codes, multiple jobs, Scottish rates, student loans, or pension
+contributions. Don't use it as the source of truth for actual payments;
+use real payroll software (or an accountant) for that. The rates live in
+`src/lib/tax.js` and will need updating for future tax years.
 
 Holiday days are paid leave, so they're paid at the day rate just like days
 actually worked — they're just tracked in their own column so you can report
