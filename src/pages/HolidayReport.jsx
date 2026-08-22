@@ -5,7 +5,7 @@ export default function HolidayReport() {
   const [employees, setEmployees] = useState([])
   const [availableYears, setAvailableYears] = useState([])
   const [year, setYear] = useState(new Date().getFullYear())
-  const [takenByEmployee, setTakenByEmployee] = useState({})
+  const [balances, setBalances] = useState({}) // employee_id -> { id, days_taken }
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -26,49 +26,70 @@ export default function HolidayReport() {
     loadStatic()
   }, [])
 
-  const loadTaken = useCallback(async () => {
+  const loadBalances = useCallback(async () => {
     setLoading(true)
     setError(null)
 
-    const { data: periods, error: perErr } = await supabase
-      .from('pay_periods')
-      .select('id')
+    const { data: emps, error: empErr } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('active', true)
+      .order('name')
+    if (empErr) {
+      setError(empErr.message)
+      setLoading(false)
+      return
+    }
+    setEmployees(emps || [])
+
+    const { data: rows, error: balErr } = await supabase
+      .from('holiday_balances')
+      .select('*')
       .eq('year', year)
-
-    if (perErr) {
-      setError(perErr.message)
+    if (balErr) {
+      setError(balErr.message)
       setLoading(false)
       return
     }
 
-    if (!periods || periods.length === 0) {
-      setTakenByEmployee({})
-      setLoading(false)
-      return
-    }
-
-    const { data: rows, error: tsErr } = await supabase
-      .from('timesheets')
-      .select('employee_id, holiday_days')
-      .in('pay_period_id', periods.map((p) => p.id))
-
-    if (tsErr) {
-      setError(tsErr.message)
-      setLoading(false)
-      return
-    }
-
-    const totals = {}
+    const byEmployee = {}
     ;(rows || []).forEach((r) => {
-      totals[r.employee_id] = (totals[r.employee_id] || 0) + Number(r.holiday_days || 0)
+      byEmployee[r.employee_id] = r
     })
-    setTakenByEmployee(totals)
+
+    // Make sure every active employee has a balance row for this year.
+    const missing = (emps || []).filter((e) => !byEmployee[e.id])
+    if (missing.length) {
+      const inserts = missing.map((e) => ({ employee_id: e.id, year, days_taken: 0 }))
+      const { data: created, error: insErr } = await supabase
+        .from('holiday_balances')
+        .insert(inserts)
+        .select('*')
+      if (insErr) setError(insErr.message)
+      ;(created || []).forEach((r) => {
+        byEmployee[r.employee_id] = r
+      })
+    }
+
+    setBalances(byEmployee)
     setLoading(false)
   }, [year])
 
   useEffect(() => {
-    loadTaken()
-  }, [loadTaken])
+    loadBalances()
+  }, [loadBalances])
+
+  async function updateTaken(emp, value) {
+    const days = value === '' ? 0 : Number(value)
+    const existing = balances[emp.id]
+    setBalances((prev) => ({ ...prev, [emp.id]: { ...prev[emp.id], days_taken: days } }))
+    if (existing?.id) {
+      await supabase
+        .from('holiday_balances')
+        .update({ days_taken: days, updated_at: new Date().toISOString() })
+        .eq('id', existing.id)
+    }
+  }
 
   return (
     <div className="paper">
@@ -102,7 +123,6 @@ export default function HolidayReport() {
           <thead>
             <tr>
               <th>Employee</th>
-              <th>Start date</th>
               <th className="num">Entitlement (days)</th>
               <th className="num">Taken in {year}</th>
               <th className="num">Remaining</th>
@@ -110,14 +130,21 @@ export default function HolidayReport() {
           </thead>
           <tbody>
             {employees.map((emp) => {
-              const taken = takenByEmployee[emp.id] || 0
+              const taken = balances[emp.id]?.days_taken ?? 0
               const remaining = (emp.holiday_entitlement_days || 0) - taken
               return (
                 <tr key={emp.id}>
                   <td>{emp.name}</td>
-                  <td>{emp.start_date || <span className="helper-text">—</span>}</td>
                   <td className="num">{emp.holiday_entitlement_days}</td>
-                  <td className="num">{taken}</td>
+                  <td className="num">
+                    <input
+                      className="cell-input"
+                      type="number"
+                      step="0.5"
+                      defaultValue={taken}
+                      onBlur={(e) => updateTaken(emp, e.target.value)}
+                    />
+                  </td>
                   <td className="num">
                     <span className={`pill ${remaining < 0 ? 'pill-red' : 'pill-green'}`}>
                       {remaining}
@@ -132,10 +159,10 @@ export default function HolidayReport() {
       )}
 
       <p className="helper-text" style={{ marginTop: 16 }}>
-        Entitlement is the annual figure set on each employee's record. Taken is the sum of
-        holiday days logged on the Monthly Timesheet across all pay periods in {year}. For
-        employees who started partway through the year, adjust their entitlement figure
-        manually to reflect a pro-rated allowance.
+        Entitlement is the annual figure set on each employee's record. Taken is editable
+        directly here — enter the number of days taken in {year} and Remaining updates
+        automatically. For employees who started partway through the year, adjust their
+        entitlement figure on the Employees page to reflect a pro-rated allowance.
       </p>
     </div>
   )

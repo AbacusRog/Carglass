@@ -79,6 +79,10 @@ migrations you're missing, in order:
    whatever labels already exist on your current adjustments.
 7. `migration_008_dob_email.sql` — adds `date_of_birth` and `email` on
    employees.
+8. `migration_009_holiday_balances.sql` — adds a `holiday_balances` table so
+   "Taken" on the Holiday Report is directly editable per employee per year.
+   It seeds itself from whatever's already logged on the Monthly Timesheet,
+   so nothing already recorded is lost.
 
 Both are safe to run on an existing database — they don't touch existing data.
 
@@ -121,7 +125,10 @@ actually controls access. `.env` is git-ignored so it won't get committed.
   date of birth, email, address, National Insurance number, and annual
   holiday entitlement. Setting a leave date stops that employee being added
   to any newly created month after the one they left — their existing
-  timesheet history is untouched, so past months still show them.
+  timesheet history is untouched, so past months still show them. The
+  roster table shows the essentials (pay, rates, holiday entitlement) —
+  click anywhere on a row to open that employee's full record in the form
+  above, including the fields not shown in the table.
 - **Monthly Timesheet** page — create a new month with "+ New month", pick
   any month from the tabs, and for each employee enter days worked, holiday
   days, extra hours, and missing hours — or tick **Full month** to simply pay
@@ -134,7 +141,7 @@ actually controls access. `.env` is git-ignored so it won't get committed.
   updates live. Every month you create stays in the tab list, so past
   months remain visible and editable.
 - **Holiday Report** page — pick a year and see, per employee, their annual
-  entitlement, days taken (summed from every month's timesheet that year),
-  and days remaining. For anyone who started partway through the year,
-  adjust their entitlement figure on the Employees page to a pro-rated
-  amount if needed.
+  entitlement, days taken, and days remaining. "Taken" is directly editable
+  right in the table — type a number and Remaining updates immediately. For
+  anyone who started partway through the year, adjust their entitlement
+  figure on the Employees page to a pro-rated amount if needed.

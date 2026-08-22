@@ -62,12 +62,22 @@ create table if not exists adjustment_types (
   unique (label, kind)
 );
 
+create table if not exists holiday_balances (
+  id uuid primary key default gen_random_uuid(),
+  employee_id uuid not null references employees(id) on delete cascade,
+  year int not null,
+  days_taken numeric(6,2) not null default 0,
+  updated_at timestamptz not null default now(),
+  unique (employee_id, year)
+);
+
 -- Row Level Security
 alter table employees enable row level security;
 alter table pay_periods enable row level security;
 alter table timesheets enable row level security;
 alter table adjustments enable row level security;
 alter table adjustment_types enable row level security;
+alter table holiday_balances enable row level security;
 
 -- Only signed-in users can read/write (adjust later if you want public view)
 create policy "auth read employees" on employees for select using (auth.role() = 'authenticated');
@@ -84,3 +94,6 @@ create policy "auth write adjustments" on adjustments for all using (auth.role()
 
 create policy "auth read adjustment_types" on adjustment_types for select using (auth.role() = 'authenticated');
 create policy "auth write adjustment_types" on adjustment_types for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+
+create policy "auth read holiday_balances" on holiday_balances for select using (auth.role() = 'authenticated');
+create policy "auth write holiday_balances" on holiday_balances for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');

@@ -287,6 +287,31 @@ input, select {
   background: rgba(201, 162, 39, 0.06);
 }
 
+.row-clickable {
+  cursor: pointer;
+}
+
+.compact-col {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.form-group-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 600;
+  margin: 18px 0 8px;
+}
+
+.form-group-label:first-child {
+  margin-top: 0;
+}
+
 .num {
   text-align: right;
   font-variant-numeric: tabular-nums;

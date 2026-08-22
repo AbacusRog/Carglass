@@ -59,6 +59,7 @@ export default function Employees() {
       holiday_entitlement_days: emp.holiday_entitlement_days,
     })
     setEditingId(emp.id)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   async function handleSubmit(e) {
@@ -134,6 +135,7 @@ export default function Employees() {
       {error && <div className="login-error">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        <div className="form-group-label">Pay & hours</div>
         <div className="field-row">
           <div className="field">
             <label>Name</label>
@@ -175,6 +177,20 @@ export default function Employees() {
             />
           </div>
           <div className="field">
+            <label>Holiday entitlement (days/yr)</label>
+            <input
+              type="number"
+              step="0.5"
+              value={form.holiday_entitlement_days}
+              onChange={(e) => setForm({ ...form, holiday_entitlement_days: e.target.value })}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="form-group-label">Employment dates</div>
+        <div className="field-row">
+          <div className="field">
             <label>Start date</label>
             <input
               type="date"
@@ -198,6 +214,10 @@ export default function Employees() {
               onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })}
             />
           </div>
+        </div>
+
+        <div className="form-group-label">Contact & payroll details</div>
+        <div className="field-row">
           <div className="field">
             <label>Email</label>
             <input
@@ -207,19 +227,6 @@ export default function Employees() {
               placeholder="name@example.com"
             />
           </div>
-          <div className="field">
-            <label>Holiday entitlement (days/yr)</label>
-            <input
-              type="number"
-              step="0.5"
-              value={form.holiday_entitlement_days}
-              onChange={(e) => setForm({ ...form, holiday_entitlement_days: e.target.value })}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="field-row">
           <div className="field" style={{ flex: '1 1 260px' }}>
             <label>Address</label>
             <input
@@ -255,7 +262,9 @@ export default function Employees() {
 
       <p className="helper-text" style={{ marginTop: -10, marginBottom: 20 }}>
         Setting a leave date stops that employee being added to any newly created month
-        after the month they left — their existing timesheet history is untouched.
+        after the month they left — their existing timesheet history is untouched. Click any
+        row below to view or edit that employee's full record, including address, NI number,
+        and other details not shown in the table.
       </p>
 
       <div className="section-title">Roster</div>
@@ -274,53 +283,37 @@ export default function Employees() {
             <tr>
               <th>Name</th>
               <th className="num">Annual wage</th>
-              <th className="num">Monthly</th>
-              <th className="num">Day rate</th>
-              <th className="num">Hourly rate</th>
-              <th className="num">Days/yr</th>
-              <th className="num">Hrs/day</th>
-              <th>Start date</th>
-              <th>Leave date</th>
-              <th>Date of birth</th>
-              <th>Email</th>
+              <th className="num compact-col">Monthly</th>
+              <th className="num compact-col">Day rate</th>
+              <th className="num compact-col">Hourly rate</th>
+              <th className="num compact-col">Days/yr</th>
+              <th className="num compact-col">Hrs/day</th>
               <th className="num">Holiday/yr</th>
-              <th>Address</th>
-              <th>NI number</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {visible.map((emp) => (
-              <tr key={emp.id} style={{ opacity: emp.active ? 1 : 0.5 }}>
+              <tr
+                key={emp.id}
+                className="row-clickable"
+                style={{ opacity: emp.active ? 1 : 0.5 }}
+                onClick={() => startEdit(emp)}
+              >
                 <td>
-                  {emp.name} {!emp.active && <span className="pill pill-red">Removed</span>}
+                  {emp.name}{' '}
+                  {!emp.active && <span className="pill pill-red">Removed</span>}
+                  {emp.active && emp.leave_date && <span className="pill pill-red">Left {emp.leave_date}</span>}
                 </td>
                 <td className="num">{formatCurrency(emp.annual_wage)}</td>
-                <td className="num">{formatCurrency(monthlyRate(emp))}</td>
-                <td className="num">{formatCurrency(dayRate(emp))}</td>
-                <td className="num">{formatCurrency(hourlyRate(emp))}</td>
-                <td className="num">{emp.working_days_per_year}</td>
-                <td className="num">{emp.working_hours_per_day}</td>
-                <td>{emp.start_date || <span className="helper-text">—</span>}</td>
-                <td>
-                  {emp.leave_date ? (
-                    <span className="pill pill-red">{emp.leave_date}</span>
-                  ) : (
-                    <span className="helper-text">—</span>
-                  )}
-                </td>
-                <td>{emp.date_of_birth || <span className="helper-text">—</span>}</td>
-                <td>{emp.email || <span className="helper-text">—</span>}</td>
+                <td className="num compact-col">{formatCurrency(monthlyRate(emp))}</td>
+                <td className="num compact-col">{formatCurrency(dayRate(emp))}</td>
+                <td className="num compact-col">{formatCurrency(hourlyRate(emp))}</td>
+                <td className="num compact-col">{emp.working_days_per_year}</td>
+                <td className="num compact-col">{emp.working_hours_per_day}</td>
                 <td className="num">{emp.holiday_entitlement_days}</td>
-                <td style={{ maxWidth: 200, whiteSpace: 'normal' }}>
-                  {emp.address || <span className="helper-text">—</span>}
-                </td>
-                <td>{emp.ni_number || <span className="helper-text">—</span>}</td>
-                <td>
+                <td onClick={(e) => e.stopPropagation()}>
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                    <button className="btn btn-outline btn-sm" onClick={() => startEdit(emp)}>
-                      Edit
-                    </button>
                     <button className="btn btn-outline btn-sm" onClick={() => toggleActive(emp)}>
                       {emp.active ? 'Remove' : 'Restore'}
                     </button>
